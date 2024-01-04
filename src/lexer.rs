@@ -17,9 +17,17 @@ impl Lexer {
         Self {
             input: input.to_string(),
             position: 0,
-            row: 0,
-            column: 0,
+            row: 1,
+            column: 1,
             ch: ' ',
+        }
+    }
+
+    fn peek_char(&self) -> char {
+        if self.position >= self.input.len() {
+            '\0'
+        } else {
+            self.input.chars().nth(self.position).unwrap()
         }
     }
 
@@ -27,15 +35,15 @@ impl Lexer {
         if self.position >= self.input.len() {
             self.ch = '\0';
         } else {
-            self.ch = self.input.chars().nth(self.position as usize).unwrap();
+            self.ch = self.input.chars().nth(self.position).unwrap();
         }
 
         self.position += 1;
-        self.column = self.position;
+        self.column += 1;
 
         if self.ch == '\n' {
             self.row += 1;
-            self.column = 0;
+            self.column = 1;
         }
         self.clone()
     }
@@ -49,10 +57,11 @@ impl Lexer {
 
     fn read_identifier(&mut self) -> String {
         let mut identifier = String::new();
-        while self.ch.is_alphanumeric() || self.ch == '_' {
+        while self.peek_char().is_alphanumeric() {
             identifier.push(self.ch);
             self.next_char();
         }
+        identifier.push(self.ch);
 
         match identifier.as_str() {
             "true" => return "0".to_string(),
