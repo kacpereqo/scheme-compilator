@@ -19,7 +19,12 @@ impl Runtime {
             let value = self.eval(arg);
             match value {
                 Some(arg) => match arg {
-                    Argument::LiteralVariable(literal) => print!("{}", literal.value),
+                    Argument::LiteralVariable(literal) => {
+                        let lines = literal.value.split("\\n");
+                        for line in lines {
+                            println!("{}", line);
+                        }
+                    }
                     _ => panic!("Unknown argument"),
                 },
                 None => print!("None"),
@@ -54,8 +59,9 @@ impl Runtime {
         }
     }
 
+    // pub fn operator_plus() {}
+
     pub fn eval(&mut self, arg: Argument) -> Option<Argument> {
-        // println!("Eval: {:#?}", arg);
         match &arg {
             Argument::Expression(expr) => match expr.function.as_str() {
                 "display" => self.display(expr.arguments.clone()),
@@ -69,9 +75,10 @@ impl Runtime {
                     None
                 }
                 "newline" => {
-                    println!("\n");
+                    print!("\n");
                     None
                 }
+                "" => None,
                 _ => panic!("Unknown function"),
             },
             Argument::LiteralVariable(_) => return Some(arg.clone()),

@@ -84,11 +84,11 @@ impl Parser {
         self.tokens[self.position].clone()
     }
 
-    #[allow(dead_code)]
     pub fn parse(&mut self) -> Vec<Argument> {
-        let mut expressions = Vec::new();
+        let mut expressions: Vec<Argument> = Vec::new();
         while self.position < self.tokens.len() {
-            expressions.push(self.parse_expression());
+            let expr = self.parse_expression();
+            expressions.push(expr);
         }
         expressions
     }
