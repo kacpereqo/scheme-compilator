@@ -97,15 +97,21 @@ impl Parser {
     fn parse_expression(&mut self) -> Argument {
         let token = self.next_token();
 
+        println!("tkn {:?}", token);
+
         match token.token {
             Tokens::Punctuation(Punctuations::LParen) => {
                 let function = self.next_token();
+
+                println!("fnc {:?}", function);
 
                 match function.token {
                     Tokens::Keyword(_) => {
                         let mut arguments = Vec::new();
                         loop {
                             let peeked = self.next_token();
+
+                            println!("pkd {:?}", peeked);
 
                             match peeked.token {
                                 Tokens::Punctuation(Punctuations::RParen) => {
@@ -123,7 +129,11 @@ impl Parser {
                                         arguments: Some(arguments),
                                     });
                                 }
-                                Tokens::Var(_) => todo!(),
+                                Tokens::Var(_) => {
+                                    arguments.push(Argument::LiteralVariable(LiteralVariable {
+                                        value: peeked.value.unwrap(),
+                                    }))
+                                }
                                 Tokens::Keyword(_) => todo!(),
                                 Tokens::Operator(_) => todo!(),
                             }
