@@ -144,7 +144,14 @@ impl Parser {
             }
             Tokens::Keyword(_) => self.find_args(token),
             Tokens::Operator(_) => self.find_args(token),
-            _ => panic!("Expected LParen"),
+            Tokens::Punctuation(Punctuations::RParen) => {
+                return Argument::Expression(Expression {
+                    function: "".to_string(),
+                    arguments: None,
+                })
+            }
+            Tokens::Eof => todo!(),
+            Tokens::Var(_) => todo!(),
         }
     }
 }
