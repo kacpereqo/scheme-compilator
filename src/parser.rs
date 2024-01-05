@@ -19,7 +19,7 @@ pub enum Argument {
 #[allow(dead_code)]
 pub struct Expression {
     function: String,
-    arguments: Option<Vec<Argument>>,
+    arguments: Vec<Argument>,
 }
 
 #[derive(Debug, Clone)]
@@ -61,7 +61,7 @@ impl Parser {
                     Tokens::Punctuation(Punctuations::RParen) => {
                         return Argument::Expression(Expression {
                             function: token.value.unwrap(),
-                            arguments: Some(arguments),
+                            arguments: arguments,
                         });
                     }
                     Tokens::Punctuation(Punctuations::LParen) => {
@@ -117,7 +117,7 @@ impl Parser {
                                 Tokens::Punctuation(Punctuations::RParen) => {
                                     return Argument::Expression(Expression {
                                         function: function.value.unwrap(),
-                                        arguments: Some(arguments),
+                                        arguments: arguments,
                                     });
                                 }
                                 Tokens::Punctuation(Punctuations::LParen) => {
@@ -126,7 +126,7 @@ impl Parser {
                                 Tokens::Eof => {
                                     return Argument::Expression(Expression {
                                         function: function.value.unwrap(),
-                                        arguments: Some(arguments),
+                                        arguments: arguments,
                                     });
                                 }
                                 Tokens::Var(_) => {
@@ -147,7 +147,7 @@ impl Parser {
             Tokens::Punctuation(Punctuations::RParen) => {
                 return Argument::Expression(Expression {
                     function: "".to_string(),
-                    arguments: None,
+                    arguments: Vec::new(),
                 })
             }
             Tokens::Eof => todo!(),
