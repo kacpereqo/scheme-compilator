@@ -4,11 +4,13 @@ use std::io::Read;
 mod cli;
 mod lexer;
 mod parser;
+mod runtime;
 mod types;
 
 use cli::Cli;
 use lexer::Lexer;
 use parser::Parser;
+use runtime::Runtime;
 
 fn main() {
     let args = Cli::new();
@@ -38,5 +40,6 @@ fn main() {
     let mut parser = Parser::new(tokens);
     let expressions = parser.parse();
 
-    println!("{:#?}", expressions);
+    let mut runtime = Runtime::new(expressions);
+    runtime.run();
 }

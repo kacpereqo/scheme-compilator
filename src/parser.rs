@@ -10,7 +10,6 @@ pub struct Parser {
 
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
-
 pub enum Argument {
     Expression(Expression),
     LiteralVariable(LiteralVariable),
@@ -18,15 +17,15 @@ pub enum Argument {
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct Expression {
-    function: String,
-    arguments: Vec<Argument>,
+    pub function: String,
+    pub arguments: Vec<Argument>,
 }
 
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 
 pub struct LiteralVariable {
-    value: String,
+    pub value: String,
 }
 
 impl Parser {
@@ -97,21 +96,15 @@ impl Parser {
     fn parse_expression(&mut self) -> Argument {
         let token = self.next_token();
 
-        println!("tkn {:?}", token);
-
         match token.token {
             Tokens::Punctuation(Punctuations::LParen) => {
                 let function = self.next_token();
-
-                println!("fnc {:?}", function);
 
                 match function.token {
                     Tokens::Keyword(_) => {
                         let mut arguments = Vec::new();
                         loop {
                             let peeked = self.next_token();
-
-                            println!("pkd {:?}", peeked);
 
                             match peeked.token {
                                 Tokens::Punctuation(Punctuations::RParen) => {

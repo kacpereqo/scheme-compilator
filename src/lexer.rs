@@ -194,7 +194,7 @@ impl Lexer {
                         value: Some(self.ch.to_string()),
                     };
                 }
-                '#' => {
+                ';' => {
                     self.skip_comment();
                 }
                 _ => {
