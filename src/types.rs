@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub enum Tokens {
     Eof,
@@ -8,7 +8,7 @@ pub enum Tokens {
     Operator(Operators),
 }
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Keywords {
     Begin,
     End,
@@ -17,10 +17,12 @@ pub enum Keywords {
     Else,
     True,
     False,
+    Display,
+    Newline,
 }
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Types {
     Int,
     Float,
@@ -31,13 +33,13 @@ pub enum Types {
 }
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Punctuations {
     LParen,
     RParen,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub enum Operators {
     Plus,
@@ -50,7 +52,7 @@ pub enum Operators {
     NotEq,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LexerToken {
     pub token: Tokens,
     pub value: Option<String>,

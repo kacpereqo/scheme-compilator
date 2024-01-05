@@ -3,10 +3,12 @@ use std::io::Read;
 
 mod cli;
 mod lexer;
+mod parser;
 mod types;
 
 use cli::Cli;
 use lexer::Lexer;
+use parser::Parser;
 
 fn main() {
     let args = Cli::new();
@@ -23,12 +25,18 @@ fn main() {
 
     println!("{}", contents);
 
+    let mut tokens: Vec<lexer::types::LexerToken> = Vec::new();
+
     loop {
         let token = lexer.next_token();
-        println!("{:?}", token);
         match token.token {
             lexer::types::Tokens::Eof => break,
-            _ => (),
+            _ => tokens.push(token),
         }
     }
+
+    let mut parser = Parser::new(tokens);
+    let expressions = parser.parse();
+
+    println!("{:#?}", expressions);
 }

@@ -1,6 +1,8 @@
 #[path = "types.rs"]
 pub(crate) mod types;
 
+use core::panic;
+
 use types::*;
 
 #[derive(Debug, Clone)]
@@ -32,6 +34,9 @@ impl Lexer {
     }
 
     fn next_char(&mut self) -> Self {
+        if self.ch == '\0' {
+            panic!("End of file");
+        }
         if self.position >= self.input.len() {
             self.ch = '\0';
         } else {
@@ -107,14 +112,16 @@ impl Lexer {
 
     fn lookup_identifier(&self, identifier: &str) -> Tokens {
         match identifier {
-            "begin" => return Tokens::Keyword(Keywords::Begin),
-            "end" => return Tokens::Keyword(Keywords::End),
-            "if" => return Tokens::Keyword(Keywords::If),
-            "then" => return Tokens::Keyword(Keywords::Then),
-            "else" => return Tokens::Keyword(Keywords::Else),
-            "true" => return Tokens::Var(Types::Bool),
-            "false" => return Tokens::Var(Types::Bool),
-            _ => return Tokens::Var(Types::Unknown),
+            "newline" => Tokens::Keyword(Keywords::Newline),
+            "display" => Tokens::Keyword(Keywords::Display),
+            "begin" => Tokens::Keyword(Keywords::Begin),
+            "false" => Tokens::Var(Types::Bool),
+            "then" => Tokens::Keyword(Keywords::Then),
+            "else" => Tokens::Keyword(Keywords::Else),
+            "true" => Tokens::Var(Types::Bool),
+            "end" => Tokens::Keyword(Keywords::End),
+            "if" => Tokens::Keyword(Keywords::If),
+            _ => Tokens::Var(Types::Unknown),
         }
     }
 
