@@ -1,5 +1,4 @@
-use std::{fmt::Error, os::raw};
-
+use crate::lexer::types::Types;
 use crate::parser::{Argument, LiteralVariable};
 
 #[derive(Debug, Clone)]
@@ -59,25 +58,71 @@ impl Runtime {
         }
     }
 
-    // pub fn operator_plus() {}
+    pub fn operator_plus(&mut self, args: Vec<Argument>) -> Option<Argument> {
+        let mut sum = 0.0;
+        for arg in args {
+            let value = self.eval(arg);
+            match value {
+                Some(arg) => match arg {
+                    Argument::LiteralVariable(literal) => {
+                        sum += literal.value.parse::<f64>().unwrap();
+                    }
+                    _ => panic!("Unknown argument"),
+                },
+                None => (),
+            }
+        }
+        return Some(Argument::LiteralVariable(LiteralVariable {
+            var_type: Types::Float,
+            value: sum.to_string(),
+        }));
+    }
+
+    pub fn operator_minus(&mut self) -> Option<Argument> {
+        println!("Subtraction");
+        None
+    }
+
+    pub fn operator_asterisk(&mut self, args: Vec<Argument>) -> Option<Argument> {
+        let mut product = 1.0;
+        for arg in args {
+            let value = self.eval(arg);
+            match value {
+                Some(arg) => match arg {
+                    Argument::LiteralVariable(literal) => {
+                        product *= literal.value.parse::<f64>().unwrap();
+                    }
+                    _ => panic!("Unknown argument"),
+                },
+                None => (),
+            }
+        }
+        return Some(Argument::LiteralVariable(LiteralVariable {
+            var_type: Types::Float,
+            value: product.to_string(),
+        }));
+    }
+
+    pub fn operator_slash(&mut self) -> Option<Argument> {
+        println!("Division");
+        None
+    }
+
+    pub fn newline(&mut self) -> Option<Argument> {
+        print!("\n");
+        None
+    }
 
     pub fn eval(&mut self, arg: Argument) -> Option<Argument> {
         match &arg {
             Argument::Expression(expr) => match expr.function.as_str() {
                 "display" => self.display(expr.arguments.clone()),
                 "begin" => self.begin(expr.arguments.clone()),
-                "+" => {
-                    println!("Additioaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaan");
-                    None
-                }
-                "*" => {
-                    println!("Multiplication");
-                    None
-                }
-                "newline" => {
-                    print!("\n");
-                    None
-                }
+                "newline" => self.newline(),
+                "+" => self.operator_plus(expr.arguments.clone()),
+                "*" => self.operator_asterisk(expr.arguments.clone()),
+                "-" => self.operator_minus(),
+                "/" => self.operator_slash(),
                 "" => None,
                 _ => panic!("Unknown function"),
             },

@@ -1,6 +1,7 @@
 use crate::lexer::types::LexerToken;
 use crate::lexer::types::Punctuations;
 use crate::lexer::types::Tokens;
+use crate::lexer::types::Types;
 
 #[derive(Clone)]
 pub struct Parser {
@@ -25,6 +26,7 @@ pub struct Expression {
 #[allow(dead_code)]
 
 pub struct LiteralVariable {
+    pub var_type: Types,
     pub value: String,
 }
 
@@ -40,6 +42,7 @@ impl Parser {
     fn next_token(&mut self) -> LexerToken {
         if self.position >= self.tokens.len() {
             return LexerToken {
+                var_type: Types::Unknown,
                 token: Tokens::Eof,
                 value: None,
             };
@@ -67,9 +70,13 @@ impl Parser {
                         arguments.push(self.parse_expression());
                     }
                     Tokens::Eof => {
-                        panic!("Unexpected EOF");
+                        return Argument::Expression(Expression {
+                            function: token.value.unwrap(),
+                            arguments: arguments,
+                        });
                     }
                     Tokens::Var(_) => arguments.push(Argument::LiteralVariable(LiteralVariable {
+                        var_type: peeked.var_type,
                         value: peeked.value.unwrap(),
                     })),
                     Tokens::Keyword(_) => todo!(),
@@ -124,6 +131,7 @@ impl Parser {
                                 }
                                 Tokens::Var(_) => {
                                     arguments.push(Argument::LiteralVariable(LiteralVariable {
+                                        var_type: peeked.var_type,
                                         value: peeked.value.unwrap(),
                                     }))
                                 }

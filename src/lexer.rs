@@ -85,7 +85,7 @@ impl Lexer {
         number
     }
 
-    fn read_number_type(&self, number: String) -> Tokens {
+    fn read_numbervar_type(&self, number: String) -> Tokens {
         if number.contains(".") {
             return Tokens::Var(Types::Float);
         }
@@ -108,6 +108,12 @@ impl Lexer {
             '/' => return Tokens::Operator(Operators::Slash),
             _ => panic!("Unknown operator"),
         }
+    }
+    fn get_numbervar_type(&mut self, number: String) -> Types {
+        if number.contains(".") {
+            return Types::Float;
+        }
+        return Types::Int;
     }
 
     fn lookup_identifier(&self, identifier: &str) -> Tokens {
@@ -160,14 +166,17 @@ impl Lexer {
                     token = self.lookup_identifier(&value);
                     return LexerToken {
                         token,
+                        var_type: Types::Keyword,
                         value: Some(value),
                     };
                 }
                 '0'..='9' => {
                     value = self.read_number();
-                    token = self.read_number_type(value.clone());
+                    let var_type = self.get_numbervar_type(value.clone());
+                    token = self.read_numbervar_type(value.clone());
                     return LexerToken {
                         token,
+                        var_type,
                         value: Some(value.clone()),
                     };
                 }
@@ -175,6 +184,7 @@ impl Lexer {
                     token = self.read_punctuation(self.ch);
                     return LexerToken {
                         token,
+                        var_type: Types::Unknown,
                         value: Some(self.ch.to_string()),
                     };
                 }
@@ -182,6 +192,7 @@ impl Lexer {
                     value = self.read_string();
                     token = Tokens::Var(Types::String);
                     return LexerToken {
+                        var_type: Types::String,
                         token,
                         value: Some(value.clone()),
                     };
@@ -190,6 +201,7 @@ impl Lexer {
                 '+' | '-' | '*' | '/' => {
                     token = self.read_operator(self.ch);
                     return LexerToken {
+                        var_type: Types::Unknown,
                         token,
                         value: Some(self.ch.to_string()),
                     };
@@ -199,6 +211,7 @@ impl Lexer {
                 }
                 _ => {
                     return LexerToken {
+                        var_type: Types::Unknown,
                         token: Tokens::Eof,
                         value: None,
                     }

@@ -28,8 +28,8 @@ pub enum Types {
     Float,
     String,
     Bool,
-    Function,
     Unknown,
+    Keyword,
 }
 
 #[allow(dead_code)]
@@ -54,6 +54,7 @@ pub enum Operators {
 
 #[derive(Debug, Clone)]
 pub struct LexerToken {
+    pub var_type: Types,
     pub token: Tokens,
     pub value: Option<String>,
 }
