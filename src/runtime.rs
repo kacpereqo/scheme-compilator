@@ -44,21 +44,25 @@ impl Runtime {
     }
 
     pub fn display(&mut self, args: Vec<Argument>) -> Option<Argument> {
+        let mut result = String::new();
         for arg in args {
             let value = self.eval(arg);
             match value {
                 Some(arg) => match arg {
                     Argument::LiteralVariable(literal) => {
-                        let lines = literal.value.split("\\n");
-                        for line in lines {
-                            println!("{}", line)
-                        }
+                        result.push_str(format!("{}", literal.value).as_str());
                     }
                     _ => panic!("Unknown argument"),
                 },
                 None => print!("None"),
             }
         }
+        // vec by splitting on \n
+        let vec = result.split("\\n");
+        for line in vec {
+            print!("{}\n", line);
+        }
+
         None
     }
 
