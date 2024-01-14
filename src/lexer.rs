@@ -62,7 +62,7 @@ impl Lexer {
 
     fn read_identifier(&mut self) -> String {
         let mut identifier = String::new();
-        while self.peek_char().is_alphanumeric() {
+        while self.peek_char().is_alphanumeric() || self.peek_char() == '-' {
             identifier.push(self.ch);
             self.next_char();
         }
@@ -141,6 +141,7 @@ impl Lexer {
             "display" => Tokens::Keyword(Keywords::Display),
             "define" => Tokens::Keyword(Keywords::Define),
             "read" => Tokens::Keyword(Keywords::Read),
+            "read-line" => Tokens::Keyword(Keywords::ReadLine),
             "begin" => Tokens::Keyword(Keywords::Begin),
             "false" => Tokens::Var(Types::Bool),
             "then" => Tokens::Keyword(Keywords::Then),
@@ -182,7 +183,7 @@ impl Lexer {
                 ' ' | '\t' | '\n' | '\r' => {
                     self.skip_whitespace();
                 }
-                'a'..='z' | 'A'..='Z' => {
+                'a'..='z' | 'A'..='Z' | '#' => {
                     value = self.read_identifier();
                     token = self.lookup_identifier(&value);
                     return LexerToken {

@@ -3,6 +3,9 @@ use std::collections::HashMap;
 use crate::lexer::types::Types;
 use crate::parser::{Argument, LiteralVariable};
 
+use std::io;
+use std::io::Write;
+
 #[derive(Debug, Clone)]
 pub struct Runtime {
     expressions: Vec<Argument>,
@@ -22,8 +25,13 @@ impl Runtime {
             _ => panic!("Unknown argument"),
         };
 
-        let value = match self.eval(args[1].clone()).unwrap() {
-            Argument::LiteralVariable(literal) => literal.value,
+        let value;
+        let var_type;
+        match self.eval(args[1].clone()).unwrap() {
+            Argument::LiteralVariable(literal) => {
+                value = literal.value;
+                var_type = literal.var_type;
+            }
             _ => panic!("Unknown argument"),
         };
 
@@ -34,13 +42,26 @@ impl Runtime {
             self.variables.insert(
                 name,
                 LiteralVariable {
-                    var_type: Types::Float,
+                    var_type: var_type,
                     value: value,
                 },
             );
         }
 
         None
+    }
+    pub fn read_line(&mut self) -> Option<Argument> {
+        let mut input = String::new();
+        std::io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
+
+        input.pop();
+
+        return Some(Argument::LiteralVariable(LiteralVariable {
+            var_type: Types::String,
+            value: input.to_string(),
+        }));
     }
 
     pub fn read(&mut self) -> Option<Argument> {
@@ -49,10 +70,22 @@ impl Runtime {
             .read_line(&mut input)
             .expect("Failed to read line");
 
-        Some(Argument::LiteralVariable(LiteralVariable {
-            var_type: Types::String,
-            value: input,
-        }))
+        input.pop();
+        if !input.chars().all(char::is_numeric) {
+            panic!("Input is not a number")
+        }
+
+        if input.contains(".") {
+            return Some(Argument::LiteralVariable(LiteralVariable {
+                var_type: Types::Float,
+                value: input,
+            }));
+        } else {
+            return Some(Argument::LiteralVariable(LiteralVariable {
+                var_type: Types::Int,
+                value: input,
+            }));
+        }
     }
 
     pub fn display(&mut self, args: Vec<Argument>) -> Option<Argument> {
@@ -61,7 +94,10 @@ impl Runtime {
             let value = self.eval(arg);
             match value {
                 Some(arg) => match arg {
-                    Argument::LiteralVariable(literal) => {
+                    Argument::LiteralVariable(mut literal) => {
+                        if literal.value.ends_with("\n") {
+                            literal.value.pop();
+                        }
                         result.push_str(format!("{}", literal.value).as_str());
                     }
                     _ => panic!("Unknown argument"),
@@ -69,10 +105,17 @@ impl Runtime {
                 None => print!("None"),
             }
         }
-        // vec by splitting on \n
-        let vec = result.split("\\n");
-        for line in vec {
-            print!("{}\n", line);
+        let vec = result.split("\\n").collect::<Vec<&str>>();
+        for line in &vec {
+            if vec.len() < 2 {
+                print!("{} ", line);
+                io::stdout().flush().unwrap();
+            } else {
+                if line.to_string() == "" {
+                    continue;
+                }
+                println!("{}", line);
+            }
         }
 
         None
@@ -249,12 +292,64 @@ impl Runtime {
         let value1 = self.eval(args[0].clone()).unwrap();
         let value2 = self.eval(args[1].clone()).unwrap();
 
-        // return true if value is equal and types are equal
+        match value1 {
+            Argument::LiteralVariable(literal) => match value2 {
+                Argument::LiteralVariable(literal2) => {
+                    let equal = literal.value == literal2.value
+                        && match (literal.var_type, literal2.var_type) {
+                            (Types::Int, Types::Int)
+                            | (Types::Float, Types::Int)
+                            | (Types::Int, Types::Float)
+                            | (Types::Float, Types::Float)
+                            | (Types::String, Types::String) => true,
+                            _ => false,
+                        };
+                    return Some(Argument::LiteralVariable(LiteralVariable {
+                        var_type: Types::Int,
+                        value: if equal {
+                            "1".to_string()
+                        } else {
+                            "0".to_string()
+                        },
+                    }));
+                }
+                _ => panic!("Unknown argument"),
+            },
+            _ => panic!("Unknown argument"),
+        }
         None
     }
 
     fn operator_ne(&mut self, args: Vec<Argument>) -> Option<Argument> {
         None
+    }
+
+    fn if_statement(&mut self, args: Vec<Argument>) -> Option<Argument> {
+        let condition = self.eval(args[0].clone()).unwrap();
+        let true_branch = args[1].clone();
+        if args.len() == 2 {
+            match condition {
+                Argument::LiteralVariable(literal) => {
+                    if literal.value == "1" {
+                        return self.eval(true_branch);
+                    }
+                }
+                _ => panic!("Unknown argument"),
+            }
+            return None;
+        }
+        let false_branch = args[2].clone();
+
+        match condition {
+            Argument::LiteralVariable(literal) => {
+                if literal.value == "1" {
+                    return self.eval(true_branch);
+                } else {
+                    return self.eval(false_branch);
+                }
+            }
+            _ => panic!("Unknown argument"),
+        }
     }
 
     pub fn eval(&mut self, arg: Argument) -> Option<Argument> {
@@ -266,6 +361,16 @@ impl Runtime {
                 "newline" => self.newline(),
                 "define" => self.define(expr.arguments.clone()),
                 "read" => self.read(),
+                "read-line" => self.read_line(),
+                "if" => self.if_statement(expr.arguments.clone()),
+                "true" | "#t" => Some(Argument::LiteralVariable(LiteralVariable {
+                    var_type: Types::Int,
+                    value: "1".to_string(),
+                })),
+                "false" | "#f" => Some(Argument::LiteralVariable(LiteralVariable {
+                    var_type: Types::Int,
+                    value: "0".to_string(),
+                })),
                 // operators
                 "+" => self.operator_plus(expr.arguments.clone()),
                 "*" => self.operator_asterisk(expr.arguments.clone()),

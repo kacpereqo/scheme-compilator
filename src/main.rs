@@ -25,8 +25,6 @@ fn main() {
 
     let mut lexer = Lexer::new(&contents);
 
-    println!("{}", contents);
-
     let mut tokens: Vec<lexer::types::LexerToken> = Vec::new();
 
     loop {

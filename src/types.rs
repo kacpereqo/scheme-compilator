@@ -21,6 +21,7 @@ pub enum Keywords {
     Newline,
     Define,
     Read,
+    ReadLine,
 }
 
 #[allow(dead_code)]
