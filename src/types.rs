@@ -48,9 +48,11 @@ pub enum Operators {
     Asterisk,
     Slash,
     Lt,
+    Le,
     Gt,
+    Ge,
     Eq,
-    NotEq,
+    Ne,
 }
 
 #[derive(Debug, Clone)]

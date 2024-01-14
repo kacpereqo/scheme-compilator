@@ -105,15 +105,28 @@ impl Lexer {
         }
     }
 
-    fn read_operator(&self, ch: char) -> Tokens {
+    fn read_single_operator(&self, ch: char) -> Tokens {
         match ch {
             '+' => return Tokens::Operator(Operators::Plus),
             '-' => return Tokens::Operator(Operators::Minus),
             '*' => return Tokens::Operator(Operators::Asterisk),
             '/' => return Tokens::Operator(Operators::Slash),
+            '<' => return Tokens::Operator(Operators::Lt),
+            '>' => return Tokens::Operator(Operators::Gt),
+            '=' => return Tokens::Operator(Operators::Eq),
             _ => panic!("Unknown operator"),
         }
     }
+
+    fn read_double_operator(&self, ch: &str) -> Tokens {
+        match ch {
+            "<=" => return Tokens::Operator(Operators::Le),
+            ">=" => return Tokens::Operator(Operators::Ge),
+            "!=" => return Tokens::Operator(Operators::Ne),
+            _ => panic!("Unknown operator"),
+        }
+    }
+
     fn get_numbervar_type(&mut self, number: String) -> Types {
         if number.contains(".") {
             return Types::Float;
@@ -204,12 +217,31 @@ impl Lexer {
                     };
                 }
 
-                '+' | '-' | '*' | '/' => {
-                    token = self.read_operator(self.ch);
-                    return LexerToken {
-                        var_type: Types::Unknown,
-                        token,
-                        value: Some(self.ch.to_string()),
+                '+' | '-' | '*' | '/' | '=' | '>' | '<' => {
+                    let peeked = self.peek_char();
+
+                    match peeked {
+                        '=' => {
+                            let mut double_operator = String::new();
+                            double_operator.push(self.ch);
+                            double_operator.push(peeked);
+                            self.next_char();
+
+                            token = self.read_double_operator(&double_operator);
+                            return LexerToken {
+                                var_type: Types::Unknown,
+                                token,
+                                value: Some(double_operator),
+                            };
+                        }
+                        _ => {
+                            token = self.read_single_operator(self.ch);
+                            return LexerToken {
+                                var_type: Types::Unknown,
+                                token,
+                                value: Some(self.ch.to_string()),
+                            };
+                        }
                     };
                 }
                 ';' => {

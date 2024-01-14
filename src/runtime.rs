@@ -210,18 +210,51 @@ impl Runtime {
         None
     }
 
+    fn operator_lt(&mut self, args: Vec<Argument>) -> Option<Argument> {
+        None
+    }
+
+    fn operator_le(&mut self, args: Vec<Argument>) -> Option<Argument> {
+        None
+    }
+
+    fn operator_gt(&mut self, args: Vec<Argument>) -> Option<Argument> {
+        None
+    }
+
+    fn operator_ge(&mut self, args: Vec<Argument>) -> Option<Argument> {
+        None
+    }
+
+    fn operator_eq(&mut self, args: Vec<Argument>) -> Option<Argument> {
+        None
+    }
+
+    fn operator_ne(&mut self, args: Vec<Argument>) -> Option<Argument> {
+        None
+    }
+
     pub fn eval(&mut self, arg: Argument) -> Option<Argument> {
         match &arg {
             Argument::Expression(expr) => match expr.function.as_str() {
+                // keywords
                 "display" => self.display(expr.arguments.clone()),
                 "begin" => self.begin(expr.arguments.clone()),
                 "newline" => self.newline(),
                 "define" => self.define(expr.arguments.clone()),
+                // operators
                 "+" => self.operator_plus(expr.arguments.clone()),
                 "*" => self.operator_asterisk(expr.arguments.clone()),
                 "-" => self.operator_minus(expr.arguments.clone()),
                 "/" => self.operator_slash(expr.arguments.clone()),
+                "<" => self.operator_lt(expr.arguments.clone()),
+                "<=" => self.operator_le(expr.arguments.clone()),
+                ">" => self.operator_gt(expr.arguments.clone()),
+                ">=" => self.operator_ge(expr.arguments.clone()),
+                "=" => self.operator_eq(expr.arguments.clone()),
+                "!=" => self.operator_ne(expr.arguments.clone()),
                 "" => None,
+                // unknown
                 _ => panic!("Unknown function"),
             },
             Argument::LiteralVariable(_) => match arg {
