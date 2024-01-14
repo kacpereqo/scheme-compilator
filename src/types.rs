@@ -47,6 +47,7 @@ pub enum Operators {
     Minus,
     Asterisk,
     Slash,
+    Percent,
     Lt,
     Le,
     Gt,

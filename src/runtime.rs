@@ -189,25 +189,29 @@ impl Runtime {
         }));
     }
 
-    // fn equal_operatr(&mut self, args: Vec<Argument>) -> Option<Argument> {
-    //     let mut result =
-
-    //     for arg in args {
-    //         let value = self.eval(arg);
-    //         match value {
-    //             Some(arg) => {}
-    //             None => (),
-    //         }
-    //     }
-    //     return Some(Argument::LiteralVariable(LiteralVariable {
-    //         var_type: Types::Bool,
-    //         value: result.value,
-    //     }));
-    // }
-
     pub fn newline(&mut self) -> Option<Argument> {
-        print!("\n");
+        println!();
         None
+    }
+
+    fn operator_percent(&mut self, args: Vec<Argument>) -> Option<Argument> {
+        let value1 = self.eval(args[0].clone()).unwrap();
+        let value2 = self.eval(args[1].clone()).unwrap();
+
+        match value1 {
+            Argument::LiteralVariable(literal) => match value2 {
+                Argument::LiteralVariable(literal2) => {
+                    let modulo = literal.value.parse::<f64>().unwrap()
+                        % literal2.value.parse::<f64>().unwrap();
+                    return Some(Argument::LiteralVariable(LiteralVariable {
+                        var_type: Types::Float,
+                        value: modulo.to_string(),
+                    }));
+                }
+                _ => panic!("Unknown argument"),
+            },
+            _ => panic!("Unknown argument"),
+        }
     }
 
     fn operator_lt(&mut self, args: Vec<Argument>) -> Option<Argument> {
@@ -227,6 +231,10 @@ impl Runtime {
     }
 
     fn operator_eq(&mut self, args: Vec<Argument>) -> Option<Argument> {
+        let value1 = self.eval(args[0].clone()).unwrap();
+        let value2 = self.eval(args[1].clone()).unwrap();
+
+        // return true if value is equal and types are equal
         None
     }
 
@@ -253,6 +261,7 @@ impl Runtime {
                 ">=" => self.operator_ge(expr.arguments.clone()),
                 "=" => self.operator_eq(expr.arguments.clone()),
                 "!=" => self.operator_ne(expr.arguments.clone()),
+                "%" => self.operator_percent(expr.arguments.clone()),
                 "" => None,
                 // unknown
                 _ => panic!("Unknown function"),

@@ -114,6 +114,7 @@ impl Lexer {
             '<' => return Tokens::Operator(Operators::Lt),
             '>' => return Tokens::Operator(Operators::Gt),
             '=' => return Tokens::Operator(Operators::Eq),
+            '%' => return Tokens::Operator(Operators::Percent),
             _ => panic!("Unknown operator"),
         }
     }
@@ -217,7 +218,7 @@ impl Lexer {
                     };
                 }
 
-                '+' | '-' | '*' | '/' | '=' | '>' | '<' => {
+                '+' | '-' | '*' | '/' | '=' | '>' | '<' | '%' => {
                     let peeked = self.peek_char();
 
                     match peeked {
