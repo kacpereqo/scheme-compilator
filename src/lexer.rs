@@ -140,6 +140,7 @@ impl Lexer {
             "newline" => Tokens::Keyword(Keywords::Newline),
             "display" => Tokens::Keyword(Keywords::Display),
             "define" => Tokens::Keyword(Keywords::Define),
+            "read" => Tokens::Keyword(Keywords::Read),
             "begin" => Tokens::Keyword(Keywords::Begin),
             "false" => Tokens::Var(Types::Bool),
             "then" => Tokens::Keyword(Keywords::Then),

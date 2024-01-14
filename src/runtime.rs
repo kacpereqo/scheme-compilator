@@ -43,6 +43,18 @@ impl Runtime {
         None
     }
 
+    pub fn read(&mut self) -> Option<Argument> {
+        let mut input = String::new();
+        std::io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
+
+        Some(Argument::LiteralVariable(LiteralVariable {
+            var_type: Types::String,
+            value: input,
+        }))
+    }
+
     pub fn display(&mut self, args: Vec<Argument>) -> Option<Argument> {
         let mut result = String::new();
         for arg in args {
@@ -87,6 +99,9 @@ impl Runtime {
                     }
                     "define" => {
                         runtime.define(expr.arguments.clone());
+                    }
+                    "read" => {
+                        runtime.read();
                     }
                     _ => panic!("Unknown function"),
                 },
@@ -250,6 +265,7 @@ impl Runtime {
                 "begin" => self.begin(expr.arguments.clone()),
                 "newline" => self.newline(),
                 "define" => self.define(expr.arguments.clone()),
+                "read" => self.read(),
                 // operators
                 "+" => self.operator_plus(expr.arguments.clone()),
                 "*" => self.operator_asterisk(expr.arguments.clone()),

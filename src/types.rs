@@ -20,6 +20,7 @@ pub enum Keywords {
     Display,
     Newline,
     Define,
+    Read,
 }
 
 #[allow(dead_code)]
