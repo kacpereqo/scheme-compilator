@@ -15,7 +15,6 @@ impl Runtime {
 
     pub fn display(&mut self, args: Vec<Argument>) -> Option<Argument> {
         for arg in args {
-            // println!("display {:#?}", arg);
             let value = self.eval(arg);
             match value {
                 Some(arg) => match arg {
@@ -79,9 +78,24 @@ impl Runtime {
         }));
     }
 
-    pub fn operator_minus(&mut self) -> Option<Argument> {
-        println!("Subtraction");
-        None
+    pub fn operator_minus(&mut self, args: Vec<Argument>) -> Option<Argument> {
+        let mut difference = 0.0;
+        for arg in args {
+            let value = self.eval(arg);
+            match value {
+                Some(arg) => match arg {
+                    Argument::LiteralVariable(literal) => {
+                        difference -= literal.value.parse::<f64>().unwrap();
+                    }
+                    _ => panic!("Unknown argument"),
+                },
+                None => (),
+            }
+        }
+        return Some(Argument::LiteralVariable(LiteralVariable {
+            var_type: Types::Float,
+            value: difference.to_string(),
+        }));
     }
 
     pub fn operator_asterisk(&mut self, args: Vec<Argument>) -> Option<Argument> {
@@ -104,10 +118,7 @@ impl Runtime {
         }));
     }
 
-    pub fn operator_slash(&mut self) -> Option<Argument> {
-        println!("Division");
-        None
-    }
+    pub fn operator_slash(&mut self) -> Option<Argument> {}
 
     pub fn newline(&mut self) -> Option<Argument> {
         print!("\n");
