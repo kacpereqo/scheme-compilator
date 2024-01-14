@@ -83,8 +83,8 @@ impl Lexer {
         let mut peeked = self.peek_char();
 
         while peeked.is_numeric() || peeked == '.' {
-            number.push(self.ch);
             self.next_char();
+            number.push(self.ch);
             peeked = self.peek_char();
         }
         number
@@ -125,6 +125,7 @@ impl Lexer {
         match identifier {
             "newline" => Tokens::Keyword(Keywords::Newline),
             "display" => Tokens::Keyword(Keywords::Display),
+            "define" => Tokens::Keyword(Keywords::Define),
             "begin" => Tokens::Keyword(Keywords::Begin),
             "false" => Tokens::Var(Types::Bool),
             "then" => Tokens::Keyword(Keywords::Then),

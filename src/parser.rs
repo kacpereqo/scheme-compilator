@@ -58,7 +58,6 @@ impl Parser {
             let mut arguments = Vec::new();
             loop {
                 let peeked = self.next_token();
-                // println!("{:?}", peeked);
 
                 match peeked.token {
                     Tokens::Punctuation(Punctuations::RParen) => {

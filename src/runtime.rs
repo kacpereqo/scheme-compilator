@@ -1,16 +1,46 @@
+use std::collections::HashMap;
+
 use crate::lexer::types::Types;
 use crate::parser::{Argument, LiteralVariable};
 
 #[derive(Debug, Clone)]
 pub struct Runtime {
     expressions: Vec<Argument>,
+    variables: HashMap<String, LiteralVariable>,
 }
 
 impl Runtime {
     pub fn new(expressions: Vec<Argument>) -> Self {
         Self {
             expressions: expressions,
+            variables: HashMap::new(),
         }
+    }
+    pub fn define(&mut self, args: Vec<Argument>) -> Option<Argument> {
+        let name = match args[0].clone() {
+            Argument::LiteralVariable(literal) => literal.value,
+            _ => panic!("Unknown argument"),
+        };
+
+        let value = match self.eval(args[1].clone()).unwrap() {
+            Argument::LiteralVariable(literal) => literal.value,
+            _ => panic!("Unknown argument"),
+        };
+
+        if self.variables.contains_key(&name) {
+            let variable = self.variables.get_mut(&name).unwrap();
+            variable.value = value;
+        } else {
+            self.variables.insert(
+                name,
+                LiteralVariable {
+                    var_type: Types::Float,
+                    value: value,
+                },
+            );
+        }
+
+        None
     }
 
     pub fn display(&mut self, args: Vec<Argument>) -> Option<Argument> {
@@ -21,7 +51,7 @@ impl Runtime {
                     Argument::LiteralVariable(literal) => {
                         let lines = literal.value.split("\\n");
                         for line in lines {
-                            println!("{}", line);
+                            println!("{}", line)
                         }
                     }
                     _ => panic!("Unknown argument"),
@@ -50,6 +80,9 @@ impl Runtime {
                     }
                     "begin" => {
                         runtime.begin(expr.arguments.clone());
+                    }
+                    "define" => {
+                        runtime.define(expr.arguments.clone());
                     }
                     _ => panic!("Unknown function"),
                 },
@@ -152,6 +185,22 @@ impl Runtime {
         }));
     }
 
+    // fn equal_operatr(&mut self, args: Vec<Argument>) -> Option<Argument> {
+    //     let mut result =
+
+    //     for arg in args {
+    //         let value = self.eval(arg);
+    //         match value {
+    //             Some(arg) => {}
+    //             None => (),
+    //         }
+    //     }
+    //     return Some(Argument::LiteralVariable(LiteralVariable {
+    //         var_type: Types::Bool,
+    //         value: result.value,
+    //     }));
+    // }
+
     pub fn newline(&mut self) -> Option<Argument> {
         print!("\n");
         None
@@ -163,6 +212,7 @@ impl Runtime {
                 "display" => self.display(expr.arguments.clone()),
                 "begin" => self.begin(expr.arguments.clone()),
                 "newline" => self.newline(),
+                "define" => self.define(expr.arguments.clone()),
                 "+" => self.operator_plus(expr.arguments.clone()),
                 "*" => self.operator_asterisk(expr.arguments.clone()),
                 "-" => self.operator_minus(expr.arguments.clone()),
@@ -170,7 +220,16 @@ impl Runtime {
                 "" => None,
                 _ => panic!("Unknown function"),
             },
-            Argument::LiteralVariable(_) => return Some(arg.clone()),
+            Argument::LiteralVariable(_) => match arg {
+                Argument::LiteralVariable(literal) => {
+                    if self.variables.contains_key(&literal.value) {
+                        let variable = self.variables.get(&literal.value).unwrap();
+                        return Some(Argument::LiteralVariable(variable.clone()));
+                    }
+                    return Some(Argument::LiteralVariable(literal));
+                }
+                _ => panic!("Unknown argument"),
+            },
         }
     }
 }
