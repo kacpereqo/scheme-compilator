@@ -2,6 +2,7 @@
 pub(crate) mod types;
 
 use core::panic;
+use std::collections::binary_heap::PeekMut;
 
 use types::*;
 
@@ -78,9 +79,14 @@ impl Lexer {
 
     fn read_number(&mut self) -> String {
         let mut number = String::new();
-        while self.ch.is_numeric() || self.ch == '.' {
+        number.push(self.ch);
+
+        let mut peeked = self.peek_char();
+
+        while peeked.is_numeric() || peeked == '.' {
             number.push(self.ch);
             self.next_char();
+            peeked = self.peek_char();
         }
         number
     }

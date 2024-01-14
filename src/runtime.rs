@@ -15,6 +15,7 @@ impl Runtime {
 
     pub fn display(&mut self, args: Vec<Argument>) -> Option<Argument> {
         for arg in args {
+            // println!("display {:#?}", arg);
             let value = self.eval(arg);
             match value {
                 Some(arg) => match arg {

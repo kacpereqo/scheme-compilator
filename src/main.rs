@@ -31,6 +31,7 @@ fn main() {
 
     loop {
         let token = lexer.next_token();
+        println!("{:?}", token);
         match token.token {
             lexer::types::Tokens::Eof => break,
             _ => tokens.push(token),
