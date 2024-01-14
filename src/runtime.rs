@@ -118,7 +118,9 @@ impl Runtime {
         }));
     }
 
-    pub fn operator_slash(&mut self) -> Option<Argument> {}
+    pub fn operator_slash(&mut self) -> Option<Argument> {
+        None
+    }
 
     pub fn newline(&mut self) -> Option<Argument> {
         print!("\n");
@@ -133,7 +135,7 @@ impl Runtime {
                 "newline" => self.newline(),
                 "+" => self.operator_plus(expr.arguments.clone()),
                 "*" => self.operator_asterisk(expr.arguments.clone()),
-                "-" => self.operator_minus(),
+                "-" => self.operator_minus(expr.arguments.clone()),
                 "/" => self.operator_slash(),
                 "" => None,
                 _ => panic!("Unknown function"),
