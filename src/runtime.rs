@@ -79,8 +79,14 @@ impl Runtime {
     }
 
     pub fn operator_minus(&mut self, args: Vec<Argument>) -> Option<Argument> {
-        let mut difference = 0.0;
-        for arg in args {
+        let mut difference;
+        match self.eval(args[0].clone()).unwrap() {
+            Argument::LiteralVariable(literal) => {
+                difference = literal.value.parse::<f64>().unwrap();
+            }
+            _ => panic!("Unknown argument"),
+        }
+        for arg in args[1..].to_vec() {
             let value = self.eval(arg);
             match value {
                 Some(arg) => match arg {
@@ -118,8 +124,32 @@ impl Runtime {
         }));
     }
 
-    pub fn operator_slash(&mut self) -> Option<Argument> {
-        None
+    pub fn operator_slash(&mut self, args: Vec<Argument>) -> Option<Argument> {
+        let mut quotient;
+
+        match self.eval(args[0].clone()).unwrap() {
+            Argument::LiteralVariable(literal) => {
+                quotient = literal.value.parse::<f64>().unwrap();
+            }
+            _ => panic!("Unknown argument"),
+        }
+
+        for arg in args[1..].to_vec() {
+            let value = self.eval(arg);
+            match value {
+                Some(arg) => match arg {
+                    Argument::LiteralVariable(literal) => {
+                        quotient /= literal.value.parse::<f64>().unwrap();
+                    }
+                    _ => panic!("Unknown argument"),
+                },
+                None => (),
+            }
+        }
+        return Some(Argument::LiteralVariable(LiteralVariable {
+            var_type: Types::Float,
+            value: quotient.to_string(),
+        }));
     }
 
     pub fn newline(&mut self) -> Option<Argument> {
@@ -136,7 +166,7 @@ impl Runtime {
                 "+" => self.operator_plus(expr.arguments.clone()),
                 "*" => self.operator_asterisk(expr.arguments.clone()),
                 "-" => self.operator_minus(expr.arguments.clone()),
-                "/" => self.operator_slash(),
+                "/" => self.operator_slash(expr.arguments.clone()),
                 "" => None,
                 _ => panic!("Unknown function"),
             },
