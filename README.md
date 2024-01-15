@@ -1,9 +1,12 @@
 # Scheme compilator
+ a turing complete scheme compilator written entirely in rust, the best programing language of all time
 
-a turing complete scheme compilator written entirely in rust, the best programing language of all time
--------------------
-
+----
 ## Syntax
+what's done and what will be done in future (never)
+<br>
+<marquee>
+
 
 ### Logical operators
 - ☑️ == 
