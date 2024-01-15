@@ -22,6 +22,7 @@ pub enum Keywords {
     Define,
     Read,
     ReadLine,
+    While,
 }
 
 #[allow(dead_code)]

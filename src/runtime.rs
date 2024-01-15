@@ -317,10 +317,24 @@ impl Runtime {
             },
             _ => panic!("Unknown argument"),
         }
-        None
     }
 
     fn operator_ne(&mut self, args: Vec<Argument>) -> Option<Argument> {
+        match self.operator_eq(args).unwrap() {
+            Argument::Expression(_) => todo!(),
+            Argument::LiteralVariable(literal) => {
+                return Some(Argument::LiteralVariable(LiteralVariable {
+                    value: if literal.value == "1" {
+                        "0".to_string()
+                    } else {
+                        "1".to_string()
+                    },
+                    var_type: Types::Int,
+                }))
+            }
+        }
+    }
+    fn while_statement(&mut self, args: Vec<Argument>) -> Option<Argument> {
         None
     }
 
@@ -362,6 +376,7 @@ impl Runtime {
                 "define" => self.define(expr.arguments.clone()),
                 "read" => self.read(),
                 "read-line" => self.read_line(),
+                "while" => self.while_statement(),
                 "if" => self.if_statement(expr.arguments.clone()),
                 "true" | "#t" => Some(Argument::LiteralVariable(LiteralVariable {
                     var_type: Types::Int,

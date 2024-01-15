@@ -147,6 +147,7 @@ impl Lexer {
             "newline" => Tokens::Keyword(Keywords::Newline),
             "display" => Tokens::Keyword(Keywords::Display),
             "define" => Tokens::Keyword(Keywords::Define),
+            "while" => Tokens::Keyword(Keywords::While),
             "read" => Tokens::Keyword(Keywords::Read),
             "read-line" => Tokens::Keyword(Keywords::ReadLine),
             "begin" => Tokens::Keyword(Keywords::Begin),
@@ -227,7 +228,7 @@ impl Lexer {
                     };
                 }
 
-                '+' | '-' | '*' | '/' | '=' | '>' | '<' | '%' => {
+                '+' | '-' | '*' | '/' | '=' | '>' | '<' | '%' | '!' => {
                     let peeked = self.peek_char();
 
                     match peeked {
