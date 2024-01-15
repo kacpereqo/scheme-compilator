@@ -97,7 +97,14 @@ impl Lexer {
         return Tokens::Var(Types::Int);
     }
 
-    fn read_punctuation(&self, ch: char) -> Tokens {
+    fn read_punctuation(&mut self, ch: char) -> Tokens {
+        let mut peeked = self.peek_char();
+
+        while peeked == '(' || peeked == ')' {
+            self.next_char();
+            peeked = self.peek_char();
+        }
+
         match ch {
             '(' => return Tokens::Punctuation(Punctuations::LParen),
             ')' => return Tokens::Punctuation(Punctuations::RParen),
