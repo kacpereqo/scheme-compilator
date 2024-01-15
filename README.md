@@ -4,9 +4,8 @@
 ----
 ## Syntax
 what's done and what will be done in future (never)
-<br>
-<marquee>
-
+\
+&nbsp;
 
 ### Logical operators
 - ☑️ == 
