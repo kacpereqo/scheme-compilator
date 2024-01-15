@@ -50,14 +50,23 @@ impl Runtime {
 
         None
     }
+    fn strip(&mut self, mut s: String) -> String {
+        if s.ends_with('\n') {
+            s.pop();
+            if s.ends_with('\r') {
+                s.pop();
+            }
+        }
+        s
+    }
+
     pub fn read_line(&mut self) -> Option<Argument> {
         let mut input = String::new();
         std::io::stdin()
             .read_line(&mut input)
             .expect("Failed to read line");
 
-        input.pop();
-
+        input = self.strip(input);
         return Some(Argument::LiteralVariable(LiteralVariable {
             var_type: Types::String,
             value: input.to_string(),
@@ -70,7 +79,7 @@ impl Runtime {
             .read_line(&mut input)
             .expect("Failed to read line");
 
-        input.pop();
+        input = self.strip(input);
         if !input.chars().all(char::is_numeric) {
             panic!("Input is not a number")
         }
@@ -105,7 +114,14 @@ impl Runtime {
                 None => print!("None"),
             }
         }
-        let vec = result.split("\\n").collect::<Vec<&str>>();
+        let mut vec = result.split("\\n").collect::<Vec<&str>>();
+        // split vec by \\r
+        vec = vec
+            .iter()
+            .map(|line| line.split("\\r").collect::<Vec<&str>>())
+            .flatten()
+            .collect::<Vec<&str>>();
+
         for line in &vec {
             if vec.len() < 2 {
                 print!("{} ", line);
@@ -335,7 +351,21 @@ impl Runtime {
         }
     }
     fn while_statement(&mut self, args: Vec<Argument>) -> Option<Argument> {
-        None
+        loop {
+            let condition = self.eval(args[0].clone()).unwrap();
+            let body = args[1].clone();
+
+            match &condition {
+                Argument::LiteralVariable(literal) => {
+                    if literal.value == "1" {
+                        self.eval(body.clone());
+                    } else {
+                        return None;
+                    }
+                }
+                _ => panic!("Unknown argument"),
+            }
+        }
     }
 
     fn if_statement(&mut self, args: Vec<Argument>) -> Option<Argument> {
@@ -376,7 +406,7 @@ impl Runtime {
                 "define" => self.define(expr.arguments.clone()),
                 "read" => self.read(),
                 "read-line" => self.read_line(),
-                "while" => self.while_statement(),
+                "while" => self.while_statement(expr.arguments.clone()),
                 "if" => self.if_statement(expr.arguments.clone()),
                 "true" | "#t" => Some(Argument::LiteralVariable(LiteralVariable {
                     var_type: Types::Int,
