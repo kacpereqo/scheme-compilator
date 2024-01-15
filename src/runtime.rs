@@ -19,7 +19,32 @@ impl Runtime {
             variables: HashMap::new(),
         }
     }
-    pub fn define(&mut self, args: Vec<Argument>) -> Option<Argument> {
+
+    pub fn run(&mut self) {
+        for expression in &self.expressions {
+            let mut runtime = self.clone();
+            match expression {
+                Argument::Expression(expr) => match expr.function.as_str() {
+                    "display" => {
+                        runtime.display(expr.arguments.clone());
+                    }
+                    "begin" => {
+                        runtime.begin(expr.arguments.clone());
+                    }
+                    "define" => {
+                        runtime.define(expr.arguments.clone());
+                    }
+                    "read" => {
+                        runtime.read();
+                    }
+                    _ => panic!("Unknown function"),
+                },
+                Argument::LiteralVariable(_) => panic!("Unknown function"),
+            }
+        }
+    }
+
+    fn define(&mut self, args: Vec<Argument>) -> Option<Argument> {
         let name = match args[0].clone() {
             Argument::LiteralVariable(literal) => literal.value,
             _ => panic!("Unknown argument"),
@@ -50,6 +75,7 @@ impl Runtime {
 
         None
     }
+
     fn strip(&mut self, mut s: String) -> String {
         if s.ends_with('\n') {
             s.pop();
@@ -60,7 +86,7 @@ impl Runtime {
         s
     }
 
-    pub fn read_line(&mut self) -> Option<Argument> {
+    fn read_line(&mut self) -> Option<Argument> {
         let mut input = String::new();
         std::io::stdin()
             .read_line(&mut input)
@@ -73,7 +99,7 @@ impl Runtime {
         }));
     }
 
-    pub fn read(&mut self) -> Option<Argument> {
+    fn read(&mut self) -> Option<Argument> {
         let mut input = String::new();
         std::io::stdin()
             .read_line(&mut input)
@@ -97,7 +123,7 @@ impl Runtime {
         }
     }
 
-    pub fn display(&mut self, args: Vec<Argument>) -> Option<Argument> {
+    fn display(&mut self, args: Vec<Argument>) -> Option<Argument> {
         let mut result = String::new();
         for arg in args {
             let value = self.eval(arg);
@@ -115,7 +141,6 @@ impl Runtime {
             }
         }
         let mut vec = result.split("\\n").collect::<Vec<&str>>();
-        // split vec by \\r
         vec = vec
             .iter()
             .map(|line| line.split("\\r").collect::<Vec<&str>>())
@@ -137,7 +162,7 @@ impl Runtime {
         None
     }
 
-    pub fn begin(&mut self, args: Vec<Argument>) -> Option<Argument> {
+    fn begin(&mut self, args: Vec<Argument>) -> Option<Argument> {
         for arg in args {
             self.eval(arg);
         }
@@ -145,31 +170,7 @@ impl Runtime {
         None
     }
 
-    pub fn run(&mut self) {
-        for expression in &self.expressions {
-            let mut runtime = self.clone();
-            match expression {
-                Argument::Expression(expr) => match expr.function.as_str() {
-                    "display" => {
-                        runtime.display(expr.arguments.clone());
-                    }
-                    "begin" => {
-                        runtime.begin(expr.arguments.clone());
-                    }
-                    "define" => {
-                        runtime.define(expr.arguments.clone());
-                    }
-                    "read" => {
-                        runtime.read();
-                    }
-                    _ => panic!("Unknown function"),
-                },
-                Argument::LiteralVariable(_) => panic!("Unknown function"),
-            }
-        }
-    }
-
-    pub fn operator_plus(&mut self, args: Vec<Argument>) -> Option<Argument> {
+    fn operator_plus(&mut self, args: Vec<Argument>) -> Option<Argument> {
         let mut sum = 0.0;
         for arg in args {
             let value = self.eval(arg);
@@ -189,7 +190,7 @@ impl Runtime {
         }));
     }
 
-    pub fn operator_minus(&mut self, args: Vec<Argument>) -> Option<Argument> {
+    fn operator_minus(&mut self, args: Vec<Argument>) -> Option<Argument> {
         let mut difference;
         match self.eval(args[0].clone()).unwrap() {
             Argument::LiteralVariable(literal) => {
@@ -215,7 +216,7 @@ impl Runtime {
         }));
     }
 
-    pub fn operator_asterisk(&mut self, args: Vec<Argument>) -> Option<Argument> {
+    fn operator_asterisk(&mut self, args: Vec<Argument>) -> Option<Argument> {
         let mut product = 1.0;
         for arg in args {
             let value = self.eval(arg);
@@ -235,7 +236,7 @@ impl Runtime {
         }));
     }
 
-    pub fn operator_slash(&mut self, args: Vec<Argument>) -> Option<Argument> {
+    fn operator_slash(&mut self, args: Vec<Argument>) -> Option<Argument> {
         let mut quotient;
 
         match self.eval(args[0].clone()).unwrap() {
@@ -263,7 +264,7 @@ impl Runtime {
         }));
     }
 
-    pub fn newline(&mut self) -> Option<Argument> {
+    fn newline(&mut self) -> Option<Argument> {
         println!();
         None
     }
@@ -289,19 +290,99 @@ impl Runtime {
     }
 
     fn operator_lt(&mut self, args: Vec<Argument>) -> Option<Argument> {
-        None
+        let val1 = self.eval(args[0].clone()).unwrap();
+        let val2 = self.eval(args[1].clone()).unwrap();
+
+        match val1 {
+            Argument::LiteralVariable(literal) => match val2 {
+                Argument::LiteralVariable(literal2) => {
+                    let less_than = literal.value.parse::<f64>().unwrap()
+                        < literal2.value.parse::<f64>().unwrap();
+                    return Some(Argument::LiteralVariable(LiteralVariable {
+                        var_type: Types::Int,
+                        value: if less_than {
+                            "1".to_string()
+                        } else {
+                            "0".to_string()
+                        },
+                    }));
+                }
+                _ => panic!("Unknown argument"),
+            },
+            _ => panic!("Unknown argument"),
+        }
     }
 
     fn operator_le(&mut self, args: Vec<Argument>) -> Option<Argument> {
-        None
+        let val1 = self.eval(args[0].clone()).unwrap();
+        let val2 = self.eval(args[1].clone()).unwrap();
+
+        match val1 {
+            Argument::LiteralVariable(literal) => match val2 {
+                Argument::LiteralVariable(literal2) => {
+                    let less_than = literal.value.parse::<f64>().unwrap()
+                        <= literal2.value.parse::<f64>().unwrap();
+                    return Some(Argument::LiteralVariable(LiteralVariable {
+                        var_type: Types::Int,
+                        value: if less_than {
+                            "1".to_string()
+                        } else {
+                            "0".to_string()
+                        },
+                    }));
+                }
+                _ => panic!("Unknown argument"),
+            },
+            _ => panic!("Unknown argument"),
+        }
     }
 
     fn operator_gt(&mut self, args: Vec<Argument>) -> Option<Argument> {
-        None
+        let val1 = self.eval(args[0].clone()).unwrap();
+        let val2 = self.eval(args[1].clone()).unwrap();
+
+        match val1 {
+            Argument::LiteralVariable(literal) => match val2 {
+                Argument::LiteralVariable(literal2) => {
+                    let less_than = literal.value.parse::<f64>().unwrap()
+                        > literal2.value.parse::<f64>().unwrap();
+                    return Some(Argument::LiteralVariable(LiteralVariable {
+                        var_type: Types::Int,
+                        value: if less_than {
+                            "1".to_string()
+                        } else {
+                            "0".to_string()
+                        },
+                    }));
+                }
+                _ => panic!("Unknown argument"),
+            },
+            _ => panic!("Unknown argument"),
+        }
     }
 
     fn operator_ge(&mut self, args: Vec<Argument>) -> Option<Argument> {
-        None
+        let val1 = self.eval(args[0].clone()).unwrap();
+        let val2 = self.eval(args[1].clone()).unwrap();
+
+        match val1 {
+            Argument::LiteralVariable(literal) => match val2 {
+                Argument::LiteralVariable(literal2) => {
+                    let less_than = literal.value.parse::<f64>().unwrap()
+                        >= literal2.value.parse::<f64>().unwrap();
+                    return Some(Argument::LiteralVariable(LiteralVariable {
+                        var_type: Types::Int,
+                        value: if less_than {
+                            "1".to_string()
+                        } else {
+                            "0".to_string()
+                        },
+                    }));
+                }
+                _ => panic!("Unknown argument"),
+            },
+            _ => panic!("Unknown argument"),
+        }
     }
 
     fn operator_eq(&mut self, args: Vec<Argument>) -> Option<Argument> {
@@ -350,6 +431,7 @@ impl Runtime {
             }
         }
     }
+
     fn while_statement(&mut self, args: Vec<Argument>) -> Option<Argument> {
         loop {
             let condition = self.eval(args[0].clone()).unwrap();
@@ -396,7 +478,7 @@ impl Runtime {
         }
     }
 
-    pub fn eval(&mut self, arg: Argument) -> Option<Argument> {
+    fn eval(&mut self, arg: Argument) -> Option<Argument> {
         match &arg {
             Argument::Expression(expr) => match expr.function.as_str() {
                 // keywords

@@ -10,20 +10,17 @@ pub struct Parser {
 }
 
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 pub enum Argument {
     Expression(Expression),
     LiteralVariable(LiteralVariable),
 }
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 pub struct Expression {
     pub function: String,
     pub arguments: Vec<Argument>,
 }
 
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 
 pub struct LiteralVariable {
     pub var_type: Types,
@@ -38,7 +35,15 @@ impl Parser {
         }
     }
 
-    #[allow(dead_code)]
+    pub fn parse(&mut self) -> Vec<Argument> {
+        let mut expressions: Vec<Argument> = Vec::new();
+        while self.position < self.tokens.len() {
+            let expr = self.parse_expression();
+            expressions.push(expr);
+        }
+        expressions
+    }
+
     fn next_token(&mut self) -> LexerToken {
         if self.position >= self.tokens.len() {
             return LexerToken {
@@ -84,20 +89,6 @@ impl Parser {
                 }
             }
         }
-    }
-
-    #[allow(dead_code)]
-    fn peek_token(&mut self) -> LexerToken {
-        self.tokens[self.position].clone()
-    }
-
-    pub fn parse(&mut self) -> Vec<Argument> {
-        let mut expressions: Vec<Argument> = Vec::new();
-        while self.position < self.tokens.len() {
-            let expr = self.parse_expression();
-            expressions.push(expr);
-        }
-        expressions
     }
 
     fn parse_expression(&mut self) -> Argument {

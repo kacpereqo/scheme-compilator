@@ -1,5 +1,5 @@
-#[derive(Debug, Clone)]
 #[allow(dead_code)]
+#[derive(Debug, Clone)]
 pub enum Tokens {
     Eof,
     Var(Types),
@@ -7,6 +7,7 @@ pub enum Tokens {
     Keyword(Keywords),
     Operator(Operators),
 }
+
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum Keywords {
@@ -43,8 +44,8 @@ pub enum Punctuations {
     RParen,
 }
 
-#[derive(Debug, Clone)]
 #[allow(dead_code)]
+#[derive(Debug, Clone)]
 pub enum Operators {
     Plus,
     Minus,
